@@ -1,12 +1,13 @@
 #!/bin/bash -e
 
 DOMAIN_JSON=${DOMAIN_JSON:-'{}'}
-DNSMASQ_OPTIONS=${DNSMASQ_OPTIONS}
+# by default send queries to all servers that can reply
+DNSMASQ_OPTIONS=${DNSMASQ_OPTIONS:---all-servers}
 
 function configure() {
   cat << EOF > /etc/dnsmasq.conf
 user=root
-$(jq '. as $servers|keys[]|. as $domain|"server=/"+$domain+"/"+$servers[$domain]' -r)
+$(jq '. as $servers|keys[]|. as $domain|$servers[$domain][]|"server=/"+$domain+"/"+.' -r)
 EOF
 }
 
